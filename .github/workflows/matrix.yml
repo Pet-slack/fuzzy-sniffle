@@ -1,0 +1,29 @@
+name: 05 - Matrix Build
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false   # don't cancel others if one fails
+      matrix:
+        os: [ubuntu-latest, windows-latest,macos-latest]
+        node: [18,20,22]
+        exclude:
+          - os: macos-latest
+            node: 18
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - run: npm ci
+      - run: npm test
