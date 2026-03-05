@@ -1,0 +1,54 @@
+name: PR Preview Deployment
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build preview site
+        run: |
+          mkdir -p site/pr-${{ github.event.pull_request.number }}
+
+          BUILD_DATE=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+
+          cat <<EOF > site/pr-${{ github.event.pull_request.number }}/index.html
+          <html>
+          <body style="font-family:sans-serif;padding:40px">
+          <h1>🚀 PR Preview</h1>
+          <p>PR: #${{ github.event.pull_request.number }}</p>
+          <p>Commit: ${{ github.sha }}</p>
+          <p>Branch: ${{ github.head_ref }}</p>
+          <p>Deployed: $BUILD_DATE</p>
+          </body>
+          </html>
+          EOF
+
+      - name: Deploy preview to gh-pages
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+
+          git fetch origin gh-pages || true
+          git checkout gh-pages || git checkout -b gh-pages
+
+          mkdir -p pr-${{ github.event.pull_request.number }}
+          cp -r site/pr-${{ github.event.pull_request.number }}/* pr-${{ github.event.pull_request.number }}/
+
+          git add .
+          git commit -m "Preview PR #${{ github.event.pull_request.number }}"
+          git push origin gh-pages
