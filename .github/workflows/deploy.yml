@@ -1,0 +1,49 @@
+name: 01 - Deploy to Pages
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true # cancel stale deploys
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build state
+        run: |
+          mkdir -p _site
+          cat > _site/index.html << 'EOF'
+          <html><head><title>Deployed by Actions</title></head>
+          <body style="font-family:sans-serif;padding:40px">
+            <h1>🚀 Deployed by GitHub Actions!</h1>
+            <p>Commit: ${{ github.sha }}</p>
+            <p>Deployed at: $(date)</p>
+          </body></html>
+          EOF
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './_site'
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
