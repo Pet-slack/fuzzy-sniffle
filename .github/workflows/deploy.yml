@@ -26,7 +26,7 @@ jobs:
 
           mkdir -p _site
           cat <<EOF > _site/index.html
-          <html><head><title>Deployed by Actions</title></head>
+          <html><head><title>Deployed by P3tsl4ck Actions</title></head>
           <body style="font-family:sans-serif;padding:40px">
             <h1>🚀 Deployed by GitHub Actions!</h1>
             <p>Commit: ${{ github.sha }}</p>
