@@ -22,13 +22,15 @@ jobs:
 
       - name: Build state
         run: |
+          BUILD_DATE=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+
           mkdir -p _site
-          cat > _site/index.html << 'EOF'
+          cat <<EOF > index.html
           <html><head><title>Deployed by Actions</title></head>
           <body style="font-family:sans-serif;padding:40px">
             <h1>🚀 Deployed by GitHub Actions!</h1>
             <p>Commit: ${{ github.sha }}</p>
-            <p>Deployed at: $(date)</p>
+            <p>Deployed at: $BUILD_DATE</p>
           </body></html>
           EOF
 
